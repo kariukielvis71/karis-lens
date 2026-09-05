@@ -1,0 +1,8 @@
+/* ==========================================================================
+   DASHBOARD STAT CARDS
+   ========================================================================== */
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-bottom:1.5rem;}
+@media (min-width:700px){.stat-grid{grid-template-columns:repeat(4,1fr);}}
+.stat-card{padding:1.2rem;display:flex;flex-direction:column;gap:.3rem;}
+.stat-card__value{font-family:var(--font-display);font-size:1.9rem;color:var(--blue-600);}
+.stat-card__label{font-family:var(--font-mono);font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);}

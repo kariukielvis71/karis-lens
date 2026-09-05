@@ -1,0 +1,19 @@
+{
+  "name": "studio-edge-app",
+  "version": "1.0.0",
+  "description": "Core logic and infrastructure layer for a modular vanilla JS app on Cloudflare D1 + R2.",
+  "type": "module",
+  "main": "src/app.js",
+  "scripts": {
+    "dev": "npx http-server . -p 8080 -c-1",
+    "start": "npx http-server . -p 8080 -c-1"
+  },
+  "keywords": [
+    "cloudflare",
+    "d1",
+    "r2",
+    "vanilla-js",
+    "whatsapp-integration"
+  ],
+  "license": "UNLICENSED"
+}
