@@ -1,63 +1,63 @@
-# Karis Media Production — Frontend Prototype
+# Karis Media Production
 
-Vanilla HTML/CSS/JS, built React-style (small pure-function components, one
-data-access layer, one event-delegating kernel) so it's ready to sit in
-front of a Cloudflare Worker + D1 + R2 backend later. Everything today runs
-on in-memory mock data — nothing is persisted between page loads yet.
+Vanilla HTML/CSS/JS frontend (small pure-function components, one
+data-access layer, one event-delegating kernel) backed by a Cloudflare
+Pages Function + D1 + R2. See **README-DEPLOY.md** for the full deploy
+walkthrough — this file just maps the codebase.
 
-## Running it
+## Running it locally
 
-Module scripts can't load over `file://`, so serve the folder over HTTP:
+Module scripts can't load over `file://`, so serve the folder over HTTP.
+Once deployed to Cloudflare Pages (see README-DEPLOY.md), `wrangler pages dev .`
+serves the frontend *and* proxies `/api/*` to `functions/api/[[path]].js`
+locally against your real D1/R2 bindings:
 
 ```
-npm run dev
+wrangler pages dev .
 ```
 
-This runs `http-server . -p 8080` (already in `package.json`). Then open
-`http://localhost:8080`.
+Plain `npm run dev` (`http-server`) also works for browsing the static
+pages, but `/api/*` calls will 404 under it since it doesn't run Pages
+Functions — use `wrangler pages dev .` whenever you need the backend too.
 
-## Admin login (mock)
+## Admin login
 
-- URL: `#/admin`
-- Username: `admin`
-- Password: `admin123`
-
-Session state is in-memory only — refreshing the page logs you out. Once
-the real Worker auth endpoint exists, only `src/utilities/auth.js` and
-`src/services/api.js` need to change; every page/component stays the same.
+Real account, created once via `POST /api/admin/setup` — see
+README-DEPLOY.md step 8. No hardcoded credentials remain in the frontend.
 
 ## Where things live
 
 ```
-index.html                 → SPA shell: <link> tags + <script src="src/app.js">
+index.html                     SPA shell: <link> tags + <script src="src/app.js">
+functions/api/[[path]].js      Cloudflare Pages Function — every /api/* route
+schema.sql / seed.sql          D1 schema + starter data
+wrangler.toml                  D1 + R2 bindings, Pages project config
 styles/
-  tokens.css                variables, reset, base type, layout primitives
+  tokens.css                    variables, reset, base type, layout primitives
   utilities/buttons.css
-  components/                header, hero, card (+ shared modal), booking, footer
-  dashboard/                  sidebar/bottom-nav, stat cards, admin shell/tables/forms
+  components/                    header, hero, card (+ shared modal), booking, footer
+  dashboard/                      sidebar/bottom-nav, stat cards, admin shell/tables/forms
 src/
-  app.js                     route dispatch + all delegated event wiring (the kernel)
-  router.js                  hash parsing + change subscription
-  pages/                     one file per route, composes components + fetches data
-  components/                pure render functions (public + components/admin/)
+  app.js                         route dispatch + all delegated event wiring (the kernel)
+  router.js                      hash parsing + change subscription
+  pages/                         one file per route, composes components + fetches data
+  components/                    pure render functions (public + components/admin/)
   services/
-    mockData.js               seed data — delete this once D1 is live
-    api.js                     async client; swap function BODIES for real fetch() calls later
-    dataLoader.js               the only data import surface pages/components use
+    api.js                       real fetch() client for functions/api/[[path]].js
+    dataLoader.js                  the only data import surface pages/components use
   utilities/
-    helpers.js                 DOM query/inject helpers, formatting, toast
-    booking.js                  booking form validation
-    channelLinks.js             wa.me / mailto: / tel: / m.me link builders
-    auth.js                     mock login check + in-memory session flag
-    icons.js                    shared inline-SVG icon set
+    helpers.js                     DOM query/inject helpers, formatting, toast
+    booking.js                      booking form validation
+    channelLinks.js                 wa.me / mailto: / tel: / m.me link builders
+    auth.js                         wraps login() + session-token presence check
+    authToken.js                     localStorage persistence for the session token
+    icons.js                        shared inline-SVG icon set
 ```
 
-## Swapping in the real backend later
+## Known follow-up
 
-- `services/api.js` — replace each function body with a `fetch("/api/...")`
-  call to the Cloudflare Worker. Nothing else changes.
-- `utilities/auth.js` — replace the mock check with the real
-  `/api/admin/login` call, and persist the returned token the same way a
-  typical vanilla-JS app does (`localStorage`, guarded by try/catch) instead
-  of the in-memory flag.
-- `services/mockData.js` can be deleted once `api.js` no longer imports it.
+`ContentForm.js` still has a plain "Cover image URL" text field.
+`uploadCover()` in `api.js` and `POST /api/upload` are both ready — the
+form just doesn't call it yet. Swapping that text input for
+`<input type="file">` and wiring it to `uploadCover()` is the next small
+piece (see the note in README-DEPLOY.md).

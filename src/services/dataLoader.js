@@ -19,6 +19,8 @@ export const getLeads = api.fetchLeads;
 export const addLead = api.createLead;
 export const setLeadStatus = api.updateLeadStatus;
 export const login = api.adminLogin;
+export const logout = api.logout;
+export const uploadCover = api.uploadCover;
 
 /** Convenience helper used by several components to label a service id. */
 export async function serviceLabel(serviceId) {

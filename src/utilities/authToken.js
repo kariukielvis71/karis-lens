@@ -1,10 +1,16 @@
-/** Shared admin token storage — used by auth.js and api.js (avoids circular imports). */
+/**
+ * authToken.js
+ * -----------------------------------------------------------------------
+ * Persists the admin session token. localStorage is guarded by try/catch
+ * per the README's swap-in plan (some browsers/privacy modes throw).
+ * -----------------------------------------------------------------------
+ */
 
-export const TOKEN_KEY = "karis_admin_token";
+const STORAGE_KEY = "karis_admin_token";
 
 export function getToken() {
   try {
-    return localStorage.getItem(TOKEN_KEY);
+    return localStorage.getItem(STORAGE_KEY);
   } catch {
     return null;
   }
@@ -12,16 +18,16 @@ export function getToken() {
 
 export function setToken(token) {
   try {
-    localStorage.setItem(TOKEN_KEY, token);
+    localStorage.setItem(STORAGE_KEY, token);
   } catch {
-    /* private browsing */
+    /* storage unavailable — session just won't survive a refresh */
   }
 }
 
 export function clearToken() {
   try {
-    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(STORAGE_KEY);
   } catch {
-    /* private browsing */
+    /* noop */
   }
 }

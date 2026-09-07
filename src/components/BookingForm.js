@@ -5,8 +5,8 @@ export function BookingForm(services) {
   return `
   <form class="glass booking-form" data-form="booking" novalidate>
     <div class="form-row">
-      <div class="field"><label for="bk-name">Full name</label><input id="bk-name" name="name" required placeholder="Lemayian Memusi" /></div>
-      <div class="field"><label for="bk-email">Email</label><input id="bk-email" name="email" type="email" required placeholder="kenya@gmail.com" /></div>
+      <div class="field"><label for="bk-name">Full name</label><input id="bk-name" name="name" required placeholder="Jane Doe" /></div>
+      <div class="field"><label for="bk-email">Email</label><input id="bk-email" name="email" type="email" required placeholder="jane@example.com" /></div>
     </div>
     <div class="form-row">
       <div class="field"><label for="bk-phone">Phone</label><input id="bk-phone" name="phone" type="tel" required placeholder="+254 700 000 000" /></div>
@@ -19,7 +19,7 @@ export function BookingForm(services) {
     </div>
     <div class="form-row">
       <div class="field"><label for="bk-date">Preferred date</label><input id="bk-date" name="eventDate" type="date" required /></div>
-      <div class="field"><label for="bk-loc">Location</label><input id="bk-loc" name="location" placeholder="e.g. Kaijiado, Kimana" /></div>
+      <div class="field"><label for="bk-loc">Location</label><input id="bk-loc" name="location" placeholder="e.g. Nairobi, Karen" /></div>
     </div>
     <div class="field"><label for="bk-notes">Tell us about your vision</label><textarea id="bk-notes" name="notes" rows="3" placeholder="Style, guest count, must-have shots..."></textarea></div>
     <div class="field">

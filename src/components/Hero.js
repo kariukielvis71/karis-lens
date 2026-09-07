@@ -4,7 +4,7 @@ export function Hero() {
   <section class="hero container">
     <div class="hero__grid">
       <div>
-        <p class="eyebrow hero__eyebrow">Photography &amp; videography — Nairobi</p>
+        <p class="eyebrow hero__eyebrow">Photography &amp; videography — Kajiado</p>
         <h1 class="hero__title">Turning moments into memories</h1>
         <p class="hero__subtitle">Cinematic wedding films, editorial portraits, and commercial visuals for people who don't want their story told twice the same way.</p>
         <div class="hero__actions">

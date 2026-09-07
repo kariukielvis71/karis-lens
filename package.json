@@ -6,7 +6,11 @@
   "main": "src/app.js",
   "scripts": {
     "dev": "npx http-server . -p 8080 -c-1",
-    "start": "npx http-server . -p 8080 -c-1"
+    "start": "npx http-server . -p 8080 -c-1",
+    "pages:dev": "npx wrangler pages dev .",
+    "pages:deploy": "npx wrangler pages deploy .",
+    "d1:schema": "npx wrangler d1 execute karis-media-db --remote --file=./schema.sql",
+    "d1:seed": "npx wrangler d1 execute karis-media-db --remote --file=./seed.sql"
   },
   "keywords": [
     "cloudflare",

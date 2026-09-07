@@ -12,7 +12,8 @@
 import { parseRoute, onRouteChange } from "./router.js";
 import { qs, qsa, delegate, renderElement, toast } from "./utilities/helpers.js";
 import { buildBookingPayload } from "./utilities/booking.js";
-import { checkCredentials, isAdminAuthed, setAdminAuthed } from "./utilities/auth.js";
+import { isAdminAuthed, setAdminAuthed, login } from "./utilities/auth.js";
+import { uploadCover } from "./services/api.js";
 import { openModal, closeModal } from "./components/Modal.js";
 import { ProjectModalBody } from "./components/ProjectCard.js";
 import { BookingConfirmation } from "./components/BookingForm.js";
@@ -133,6 +134,39 @@ function wireDelegatedChanges() {
     if (lead) toast(`Marked ${lead.name} as ${el.value}`);
     render();
   });
+
+  /** Uploads the chosen file to R2 via api.uploadCover() and drops the
+   *  returned URL into the hidden #cf-cover field the form actually submits. */
+  delegate(document, "change", '[data-action="cover-upload"]', async (event, el) => {
+    const file = el.files[0];
+    if (!file) return;
+
+    const form = el.closest("form");
+    const statusEl = form.querySelector("#cf-cover-status");
+    const preview = form.querySelector("#cf-cover-preview");
+    const coverField = form.querySelector("#cf-cover");
+    const submitBtn = form.querySelector('[data-role="content-submit"]');
+
+    el.disabled = true;
+    if (submitBtn) submitBtn.disabled = true;
+    if (statusEl) statusEl.textContent = "Uploading…";
+
+    try {
+      const { url } = await uploadCover(file);
+      coverField.value = url;
+      if (preview) {
+        preview.src = url;
+        preview.hidden = false;
+      }
+      if (statusEl) statusEl.textContent = "Uploaded";
+    } catch (err) {
+      if (statusEl) statusEl.textContent = "";
+      toast(err.message || "Upload failed — try again");
+    } finally {
+      el.disabled = false;
+      if (submitBtn) submitBtn.disabled = false;
+    }
+  });
 }
 
 function wireForms() {
@@ -153,15 +187,15 @@ function wireForms() {
     if (slot) slot.innerHTML = BookingConfirmation(lead, business, label);
   });
 
-  delegate(document, "submit", '[data-form="admin-login"]', (event) => {
+  delegate(document, "submit", '[data-form="admin-login"]', async (event) => {
     event.preventDefault();
     const data = Object.fromEntries(new FormData(event.target).entries());
-    if (checkCredentials(data.username, data.password)) {
-      setAdminAuthed(true);
+    const result = await login(data.username, data.password);
+    if (result.ok) {
       window.location.hash = "#/admin";
       render();
     } else {
-      toast("Invalid credentials — try admin / admin123");
+      toast(result.error || "Invalid username or password");
     }
   });
 
@@ -169,6 +203,10 @@ function wireForms() {
     event.preventDefault();
     const form = event.target;
     const data = Object.fromEntries(new FormData(form).entries());
+    if (!data.cover) {
+      toast("Please upload a cover image before saving.");
+      return;
+    }
     const id = form.getAttribute("data-id");
     if (id) {
       await editContent(id, data);

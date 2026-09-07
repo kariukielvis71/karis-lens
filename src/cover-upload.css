@@ -1,0 +1,21 @@
+/* Add to styles/dashboard/admin-forms.css (or wherever .content-form
+   already lives) — supports the new file-upload cover field. */
+
+.cover-upload {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cover-upload__preview {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.cover-upload__status {
+  font-size: 0.8rem;
+  opacity: 0.75;
+}

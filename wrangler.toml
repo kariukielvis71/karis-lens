@@ -1,26 +1,17 @@
-name = "karis-media-production"
-main = "worker/index.js"
-compatibility_date = "2024-08-01"
-
-[assets]
-directory = "."
-binding = "ASSETS"
-not_found_handling = "single-page-application"
+name = "karis-media"
+pages_build_output_dir = "."
+compatibility_date = "2026-09-01"
 
 [[d1_databases]]
-binding = "DB"
+binding = "DB"                       # -> env.DB in functions/api/[[path]].js
 database_name = "karis-media-db"
-database_id = "local-dev"
-migrations_dir = "migrations"
+database_id = "PASTE_FROM_D1_CREATE_OUTPUT"
 
 [[r2_buckets]]
-binding = "MEDIA"
-bucket_name = "karis-media-media"
+binding = "BUCKET"                   # -> env.BUCKET
+bucket_name = "karis-media-uploads"
 
 [vars]
-ADMIN_USER = "admin"
-
-# Set ADMIN_PASSWORD via `wrangler secret put ADMIN_PASSWORD` in production.
-
-[dev]
-port = 8080
+R2_PUBLIC_BASE = "https://pub-PASTE_YOUR_R2_DEV_SUBDOMAIN.r2.dev"
+# ADMIN_SETUP_SECRET is a secret, not a var — set it with:
+#   wrangler pages secret put ADMIN_SETUP_SECRET
