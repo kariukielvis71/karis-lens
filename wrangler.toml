@@ -5,13 +5,8 @@ compatibility_date = "2026-09-01"
 [[d1_databases]]
 binding = "DB"                       # -> env.DB in functions/api/[[path]].js
 database_name = "karis-media-db"
-database_id = "PASTE_FROM_D1_CREATE_OUTPUT"
+database_id = "5681257f-cb85-4b2d-9313-a0d7e92dfd15"
 
-[[r2_buckets]]
-binding = "BUCKET"                   # -> env.BUCKET
-bucket_name = "karis-media-uploads"
-
-[vars]
-R2_PUBLIC_BASE = "https://pub-PASTE_YOUR_R2_DEV_SUBDOMAIN.r2.dev"
-# ADMIN_SETUP_SECRET is a secret, not a var — set it with:
-#   wrangler pages secret put ADMIN_SETUP_SECRET
+# ADMIN_SETUP_SECRET is a secret, not a var — for git-connected Pages
+# projects, set it in the dashboard: Settings -> Environment variables
+# -> add ADMIN_SETUP_SECRET as "Encrypted".

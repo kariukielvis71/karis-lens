@@ -13,7 +13,11 @@ CREATE TABLE business (
   name TEXT NOT NULL,
   whatsapp TEXT NOT NULL,
   email TEXT NOT NULL,
-  messenger_user TEXT NOT NULL
+  messenger_user TEXT NOT NULL,
+  tiktok TEXT,       -- full profile URL, nullable — shown as a link if set
+  facebook TEXT,
+  youtube TEXT,
+  instagram TEXT
 );
 
 CREATE TABLE services (
@@ -30,10 +34,12 @@ CREATE TABLE content (
   title TEXT NOT NULL,
   category TEXT NOT NULL,
   status TEXT NOT NULL CHECK (status IN ('completed','upcoming')),
-  cover TEXT NOT NULL,
+  cover TEXT NOT NULL,               -- pasted image URL (Unsplash, etc.) — no file storage
   date TEXT NOT NULL,
   description TEXT NOT NULL DEFAULT '',
-  linked_project_id INTEGER REFERENCES content(id)
+  linked_project_id INTEGER REFERENCES content(id),
+  platform TEXT CHECK (platform IN ('tiktok','youtube','facebook','instagram') OR platform IS NULL),
+  external_url TEXT                  -- "view on <platform>" link, optional
 );
 
 CREATE TABLE leads (

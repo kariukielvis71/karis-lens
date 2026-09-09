@@ -2,20 +2,19 @@
  * functions/api/[[path]].js
  * -----------------------------------------------------------------------
  * Cloudflare Pages Function — catches every request under /api/* and
- * implements exactly the routes services/api.js already calls. No
- * external dependencies: auth uses Web Crypto (PBKDF2) + a plain
- * session-token table in D1, so it works out of the box on the free tier.
+ * implements exactly the routes services/api.js calls. No external
+ * dependencies: auth uses Web Crypto (PBKDF2) + a plain session-token
+ * table in D1. No file storage — cover images and "view on <platform>"
+ * links are both just pasted URLs (Unsplash, TikTok, YouTube, etc.).
  *
  * Bindings expected (see wrangler.toml):
- *   env.DB               — D1 database
- *   env.BUCKET           — R2 bucket (cover image uploads)
- *   env.R2_PUBLIC_BASE   — public base URL for that bucket (r2.dev or custom domain)
+ *   env.DB                 — D1 database
  *   env.ADMIN_SETUP_SECRET — secret required to create/reset the admin account
  * -----------------------------------------------------------------------
  */
 
-const ALLOWED_CONTENT_FIELDS = ["kind", "title", "category", "status", "cover", "date", "description", "linkedProjectId"];
-const CONTENT_COLUMN_MAP = { linkedProjectId: "linked_project_id" };
+const ALLOWED_CONTENT_FIELDS = ["kind", "title", "category", "status", "cover", "date", "description", "linkedProjectId", "platform", "externalUrl"];
+const CONTENT_COLUMN_MAP = { linkedProjectId: "linked_project_id", externalUrl: "external_url" };
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 function json(data, status = 200) {
@@ -82,6 +81,8 @@ function contentRowToApi(row) {
     date: row.date,
     description: row.description,
     linkedProjectId: row.linked_project_id ?? undefined,
+    platform: row.platform ?? undefined,
+    externalUrl: row.external_url ?? undefined,
   };
 }
 function leadRowToApi(row) {
@@ -109,7 +110,9 @@ export async function onRequest(context) {
   try {
     // ---------------- public routes ----------------
     if (path === "/business" && method === "GET") {
-      const row = await db.prepare("SELECT name, whatsapp, email, messenger_user as messengerUser FROM business WHERE id = 1").first();
+      const row = await db.prepare(
+        "SELECT name, whatsapp, email, messenger_user as messengerUser, tiktok, facebook, youtube, instagram FROM business WHERE id = 1"
+      ).first();
       return row ? json(row) : errorResponse("Business record not seeded", 500);
     }
 
@@ -185,9 +188,12 @@ export async function onRequest(context) {
         if (!body[f]) return errorResponse(`Missing field: ${f}`, 422);
       }
       const result = await db.prepare(
-        `INSERT INTO content (kind, title, category, status, cover, date, description, linked_project_id)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-      ).bind(body.kind, body.title, body.category, body.status, body.cover, body.date, body.description || "", body.linkedProjectId || null).run();
+        `INSERT INTO content (kind, title, category, status, cover, date, description, linked_project_id, platform, external_url)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ).bind(
+        body.kind, body.title, body.category, body.status, body.cover, body.date,
+        body.description || "", body.linkedProjectId || null, body.platform || null, body.externalUrl || null
+      ).run();
       const row = await db.prepare("SELECT * FROM content WHERE id = ?").bind(result.meta.last_row_id).first();
       return json(contentRowToApi(row), 201);
     }
@@ -207,16 +213,6 @@ export async function onRequest(context) {
     if (contentMatch && method === "DELETE") {
       await db.prepare("DELETE FROM content WHERE id = ?").bind(contentMatch[1]).run();
       return new Response(null, { status: 204 });
-    }
-
-    if (path === "/upload" && method === "POST") {
-      const formData = await request.formData();
-      const file = formData.get("file");
-      if (!file || typeof file === "string") return errorResponse("No file provided", 422);
-      const ext = (file.name.split(".").pop() || "bin").toLowerCase().replace(/[^a-z0-9]/g, "") || "bin";
-      const key = `covers/${crypto.randomUUID()}.${ext}`;
-      await env.BUCKET.put(key, file.stream(), { httpMetadata: { contentType: file.type || "application/octet-stream" } });
-      return json({ key, url: `${env.R2_PUBLIC_BASE}/${key}` }, 201);
     }
 
     return errorResponse("Not found", 404);
