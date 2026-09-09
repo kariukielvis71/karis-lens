@@ -1,0 +1,11 @@
+wrangler.toml
+worker.js
+functions/
+schema.sql
+seed.sql
+README-DEPLOY.md
+package.json
+package-lock.json
+node_modules
+.git
+.wrangler
